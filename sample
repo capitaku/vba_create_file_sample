@@ -1,0 +1,67 @@
+' /**
+'  * 現在実行しているディレクトリに
+'  * 指定されたファイル名で新規ブック保存します。
+'  */
+Private Sub createFileButton_Click()
+    
+    ' 変数定義
+    Dim nowWorkbookPath As String      ' 作業中のブックパス
+    Dim saveFileName As String         ' 保存ファイル名
+    Dim saveFileDir As String          ' 保存先ディレクトリ
+    Dim saveFileFullPath As String     ' 保存先フルパス
+
+    ' 作業中のブックパスを取得
+    nowWorkbookPath = ThisWorkbook.Path
+    ' 指定されたセルのファイル名を取得
+    saveFileName = Range("A1") & ".xlsx"
+    ' 保存先フルパスを設定
+    saveFileFullPath = nowWorkbookPath & "\" & saveFileName
+    'カレントディレクトリを変更
+    ChDir nowWorkbookPath
+
+    ' ファイル存在チェック
+    If fileExists(saveFileFullPath) = True Then
+        ' 既にファイルが存在する場合
+        Dim rc As VbMsgBoxResult
+        rc = MsgBox("既に" & saveFileFullPath & "が存在しますが上書きしますか？", vbYesNo + vbDefaultButton2)
+    
+        If rc = vbYes Then
+            ' 以下で表示されるメッセージを非表示に
+            Application.DisplayAlerts = False
+        Else
+            ' ユーザーアクションNoのため処理終了
+            End
+        End If
+    Else
+        ' 重複するファイル名はないため処理続行
+    End If
+    
+    ' 新規ブックとワークシートを作成
+    Dim newWb As Workbook
+    Set newWb = Workbooks.Add
+    Set newWs = newWb.Worksheets(1)
+
+    ' ----------------------------------------------
+    ' 既存ブックから新規ブックへ値をコピーする
+    ' ----------------------------------------------
+    newWs.Range("A1") = Range("A1")
+        
+    ' 保存ファイルパスと保存形式を指定する。
+    newWb.SaveAs Filename:=saveFileFullPath, _
+                 FileFormat:=xlOpenXMLWorkbook
+    newWb.Close
+
+End Sub
+
+' /**
+'  * 指定されたファイル名が存在するか返します。
+'  * @param saveFileFullPath {String} フルパス
+'  * @return fileExists {boolean} 存在する／しない
+'  */
+Function fileExists(ByVal saveFileFullPath As String) As Boolean
+    If Dir(saveFileFullPath) <> "" Then
+        fileExists = True
+    Else
+        fileExists = False
+    End If
+End Function
